@@ -250,6 +250,16 @@
                     <span class="w-2 h-2 rounded-full bg-rose-400"></span>
                     <span>4. Diagnóstico (Retos Rotos)</span>
                 </button>
+                <button id="btn-flow-5" onclick="switchFlow(5)"
+                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-400 hover:text-white">
+                    <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+                    <span>5. StatefulSet + PVC</span>
+                </button>
+                <button id="btn-flow-6" onclick="switchFlow(6)"
+                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-400 hover:text-white">
+                    <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+                    <span>6. Helm (Rollback)</span>
+                </button>
             </div>
 
             <!-- Playback Controls & Speed -->
@@ -1363,6 +1373,140 @@
                         ]
                     }
                 ]
+            },
+            5: {
+                name: "Flujo 5 • StatefulSet (MySQL) + Headless Service + PVC",
+                command: "kubectl apply -f 08-statefulset-mysql-headless-app.yaml",
+                theme: "purple",
+                steps: [
+                    {
+                        id: 1,
+                        shortName: "1. Headless + STS",
+                        title: "1. Headless Service (clusterIP: None) y StatefulSet",
+                        activeNodes: ["node-kubectl", "node-apiserver", "node-etcd"],
+                        fromNode: "node-kubectl",
+                        toNode: "node-apiserver",
+                        packetText: "StatefulSet + Headless",
+                        podStatus: "Creando mysql-0",
+                        podVisualState: "pending",
+                        cafeDesc: "En KubeCafé abrimos la bóveda principal de granos (MySQL). A diferencia de los baristas intercambiables, esta bóveda necesita un nombre fijo (mysql-0) y su propio estante privado.",
+                        simpleDesc: "Un Headless Service (clusterIP: None) no crea una IP virtual compartida: registra en DNS directamente la IP real de cada Pod (mysql-0.mysql-headless...).",
+                        techDesc: "kube-apiserver persiste el Service con spec.clusterIP: None y el StatefulSet con serviceName: mysql-headless y volumeClaimTemplates (1Gi) en etcd.",
+                        yamlCode: `apiVersion: v1\nkind: Service\nmetadata:\n  name: mysql-headless\nspec:\n  clusterIP: None\n  selector:\n    app: mysql\n---\nkind: StatefulSet\nmetadata:\n  name: mysql\nspec:\n  serviceName: mysql-headless`,
+                        logs: [
+                            "[kubectl] service/mysql-headless created (CLUSTER-IP: None)",
+                            "[kubectl] statefulset.apps/mysql created",
+                            "[etcd] Estado deseado guardado: replicas=1, volumeClaimTemplates=mysql-data"
+                        ]
+                    },
+                    {
+                        id: 2,
+                        shortName: "2. PVC Dedicado",
+                        title: "2. Aprovisionamiento Dinámico del PVC (mysql-data-mysql-0)",
+                        activeNodes: ["node-controller", "node-scheduler", "node-kubelet"],
+                        fromNode: "node-controller",
+                        toNode: "node-kubelet",
+                        packetText: "Bind PV -> mysql-0",
+                        podStatus: "PVC Bound + Running",
+                        podVisualState: "running",
+                        cafeDesc: "El administrador crea automáticamente una bodega exclusiva llamada mysql-data-mysql-0 y se la entrega únicamente a mysql-0.",
+                        simpleDesc: "El StatefulSet genera un PVC dedicado (mysql-data-mysql-0). El StorageClass (por ejemplo Rancher local-path) fabrica el PV automáticamente y lo enlaza (Bound).",
+                        techDesc: "StatefulSet Controller crea el PVC mysql-data-mysql-0. Tras agendar mysql-0 en un nodo, el provisioner (WaitForFirstConsumer) crea el PV en /opt/local-path-provisioner y lo monta en /var/lib/mysql.",
+                        yamlCode: `volumeClaimTemplates:\n- metadata:\n    name: mysql-data\n  spec:\n    accessModes: ["ReadWriteOnce"]\n    resources:\n      requests:\n        storage: 1Gi`,
+                        logs: [
+                            "[pvc] persistentvolumeclaim/mysql-data-mysql-0 Bound",
+                            "[kubelet] Volumen montado en /var/lib/mysql",
+                            "[pod/mysql-0] Running (1/1 Ready)"
+                        ]
+                    },
+                    {
+                        id: 3,
+                        shortName: "3. DNS Directo",
+                        title: "3. Backend resuelve mysql-0 por DNS sin balanceo aleatorio",
+                        activeNodes: ["node-service", "node-pod"],
+                        fromNode: "node-service",
+                        toNode: "node-pod",
+                        packetText: "DNS -> IP mysql-0",
+                        podStatus: "mysql-0 Conectado",
+                        podVisualState: "running",
+                        cafeDesc: "El Backend pregunta por la bóveda #0 por su nombre exacto y recibe la dirección directa sin pasar por la fila de meseros.",
+                        simpleDesc: "Al consultar mysql-0.mysql-headless.default.svc.cluster.local, CoreDNS responde directamente la IP del Pod mysql-0 (ej. 10.244.x.y).",
+                        techDesc: "CoreDNS resuelve el registro A del Pod individual asociado al Headless Service. Si mysql-0 se borra, renace con el mismo nombre y se reconecta al mismo PVC mysql-data-mysql-0.",
+                        yamlCode: `# Consulta DNS desde el Backend:\n$ nslookup mysql-0.mysql-headless.default.svc.cluster.local\nAddress: 10.244.x.y  # IP directa de mysql-0`,
+                        logs: [
+                            "[coredns] mysql-0.mysql-headless.default.svc.cluster.local -> 10.244.1.25",
+                            "[backend] Conexión MySQL OK -> @@hostname = mysql-0",
+                            "[db] Datos persistentes intactos tras reinicio de mysql-0"
+                        ]
+                    }
+                ]
+            },
+            6: {
+                name: "Flujo 6 • Empaquetado con Helm (Install, Upgrade y Rollback)",
+                command: "helm upgrade kubecafe-dev ./kubecafe-chart && helm rollback kubecafe-dev 1",
+                theme: "blue",
+                steps: [
+                    {
+                        id: 1,
+                        shortName: "1. Lint & Template",
+                        title: "1. Validación Local: helm lint + helm template",
+                        activeNodes: ["node-kubectl"],
+                        fromNode: "node-kubectl",
+                        toNode: "node-apiserver",
+                        packetText: "Render Go Templates",
+                        podStatus: "Validando Chart",
+                        podVisualState: "pending",
+                        cafeDesc: "Antes de abrir una nueva franquicia de KubeCafé, revisamos que el kit (kubecafe-chart) tenga todos los planos y valores completos.",
+                        simpleDesc: "Helm combina templates/*.yaml con values.yaml (o values-prod.yaml) y verifica errores de sintaxis con 'helm lint' antes de tocar el clúster.",
+                        techDesc: "helm lint valida Chart.yaml (SemVer) y renderiza las plantillas Go (incluyendo helpers como nindent). helm template imprime los manifiestos finales en stdout.",
+                        yamlCode: `$ helm lint semana-06-helm/1.ejemplos/kubecafe-chart\n==> Linting ...\n1 chart(s) linted, 0 chart(s) failed`,
+                        logs: [
+                            "[helm] Leyendo Chart.yaml (version: 0.1.0) y values.yaml",
+                            "[helm] 1 chart(s) linted, 0 chart(s) failed",
+                            "[helm] Listo para desplegar release kubecafe-dev"
+                        ]
+                    },
+                    {
+                        id: 2,
+                        shortName: "2. Install & Upgrade",
+                        title: "2. Despliegue (Rev 1) y Fallo en Upgrade (Rev 2)",
+                        activeNodes: ["node-kubectl", "node-apiserver", "node-kubelet", "node-pod"],
+                        fromNode: "node-apiserver",
+                        toNode: "node-pod",
+                        packetText: "Rev 2 (Image Error)",
+                        podStatus: "ImagePullBackOff (Rev 2)",
+                        podVisualState: "crashed",
+                        cafeDesc: "Instalamos la versión 1 sana, pero al actualizar a la versión 2 alguien escribió mal el nombre de la bolsa de café (image.tag=no-existe-999).",
+                        simpleDesc: "Helm guarda cada despliegue como una revisión en un Secret del clúster. Al fallar la revisión 2, los Pods nuevos quedan en ImagePullBackOff.",
+                        techDesc: "helm upgrade crea un nuevo Secret sh.helm.release.v1.kubecafe-dev.v2. El Deployment intenta hacer rollout pero kubelet falla al descargar la imagen.",
+                        yamlCode: `$ helm upgrade kubecafe-dev ./kubecafe-chart --set image.tag=no-existe-999\n$ helm history kubecafe-dev\nREVISION  STATUS    DESCRIPTION\n1         superseded Install complete\n2         deployed   Upgrade complete (Pod en ImagePullBackOff)`,
+                        logs: [
+                            "[helm] Release kubecafe-dev actualizado a revisión 2",
+                            "❌ [kubelet] Failed to pull image 'nginx:no-existe-999'",
+                            "[helm] Revisión 1 sigue guardada en historial para rollback"
+                        ]
+                    },
+                    {
+                        id: 3,
+                        shortName: "3. Rollback & Test",
+                        title: "3. Recuperación Instantánea (helm rollback) + helm test",
+                        activeNodes: ["node-kubectl", "node-apiserver", "node-controller", "node-pod"],
+                        fromNode: "node-kubectl",
+                        toNode: "node-pod",
+                        packetText: "Rollback -> Rev 1",
+                        podStatus: "Running + Test OK",
+                        podVisualState: "running",
+                        cafeDesc: "Con una sola orden volvemos exactamente a la receta de la revisión 1 y mandamos a un catador (helm test) a confirmar que el servicio responde.",
+                        simpleDesc: "'helm rollback kubecafe-dev 1' restaura los manifiestos exactos de la revisión 1 y 'helm test' lanza un Pod temporal de verificación.",
+                        techDesc: "helm rollback crea la revisión 3 con el estado de la revisión 1. Luego helm test ejecuta el Pod con anotación 'helm.sh/hook: test' hasta Phase: Succeeded.",
+                        yamlCode: `$ helm rollback kubecafe-dev 1\nRollback was a success! Happy Helming!\n$ helm test kubecafe-dev --logs\nPhase: Succeeded`,
+                        logs: [
+                            "[helm] Rollback a revisión 1 completado (creada revisión 3)",
+                            "[pod] Todos los Pods de kubecafe-dev en Running",
+                            "✅ [helm test] kubecafe-dev-test-connection -> Phase: Succeeded"
+                        ]
+                    }
+                ]
             }
         };
 
@@ -1508,10 +1652,12 @@
                 1: "bg-k8s-blue text-white shadow-[0_0_15px_rgba(50,108,229,0.4)]",
                 2: "bg-emerald-600 text-white shadow-[0_0_15px_rgba(16,185,129,0.4)]",
                 3: "bg-amber-600 text-white shadow-[0_0_15px_rgba(245,158,11,0.4)]",
-                4: "bg-rose-600 text-white shadow-[0_0_15px_rgba(244,63,94,0.4)]"
+                4: "bg-rose-600 text-white shadow-[0_0_15px_rgba(244,63,94,0.4)]",
+                5: "bg-purple-600 text-white shadow-[0_0_15px_rgba(147,51,234,0.4)]",
+                6: "bg-cyan-600 text-white shadow-[0_0_15px_rgba(8,145,178,0.4)]"
             };
 
-            [1, 2, 3, 4].forEach(id => {
+            [1, 2, 3, 4, 5, 6].forEach(id => {
                 const btn = document.getElementById(`btn-flow-${id}`);
                 if (!btn) return;
                 if (id === flowId) {
