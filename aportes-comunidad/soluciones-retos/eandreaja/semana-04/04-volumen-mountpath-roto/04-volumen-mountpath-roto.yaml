@@ -1,0 +1,22 @@
+# 💥 Reto 04: volumeMounts no coincide con volumes
+# Objetivo: Al aplicar el Pod, el API Server lo rechaza porque el nombre del volumeMount no existe en volumes.
+# Pista: Compara `spec.containers[0].volumeMounts[0].name` con `spec.volumes[0].name`.
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-volumen-reto-04
+spec:
+  containers:
+    - name: app
+      image: busybox:1.36
+      command: ["sh", "-c", "ls -la /datos && sleep 3600"]
+      volumeMounts:
+        # Error: montaba el volumen datos-kubecafe, que no está declarado en volumes.
+        # Lo vi con: kubectl apply -f, que rechazó el Pod con "Not found: datos-kubecafe".
+        # Solución: usar el nombre del volumen que sí existe, volumen-bodega.
+        - name: volumen-bodega
+          mountPath: /datos
+  volumes:
+    - name: volumen-bodega
+      emptyDir: {}
