@@ -169,11 +169,11 @@
         <a href="./semana-04-configuracion-almacenamiento"><code>semana-04-configuracion-almacenamiento/</code></a>
       </td>
       <td align="center">
-        <a href="./semana-04-configuracion-almacenamiento"><img src="https://img.shields.io/badge/Config_%26_PV-En_Curso-8B5CF6?style=flat-square&logo=kubernetes&logoColor=white" alt="Config y PV En Curso"/></a><br/>
+        <a href="./semana-04-configuracion-almacenamiento"><img src="https://img.shields.io/badge/Config_%26_PV-Disponible-8B5CF6?style=flat-square&logo=kubernetes&logoColor=white" alt="Config y PV Disponible"/></a><br/>
         <sub><b>+50 XP</b> (5 Retos + 10 Bitácora)</sub>
       </td>
       <td>
-        <code>ConfigMaps</code>, <code>Secrets</code>, <code>emptyDir</code> vs <code>hostPath</code>, <b>PV/PVC</b> y <b>StorageClass</b> dinámico.<br/>
+        <code>ConfigMaps</code>, <code>Secrets</code>, <code>emptyDir</code> vs <code>hostPath</code>, <b>PV/PVC</b>, <b>StorageClass</b>, <b>StatefulSet</b> (MySQL) y <b>Headless Service</b>.<br/>
         <sub><a href="./semana-04-configuracion-almacenamiento/README.md">📖 Guía</a> • <a href="./semana-04-configuracion-almacenamiento/1.ejemplos">🧪 Ejemplos</a> • <a href="./semana-04-configuracion-almacenamiento/2.reto-roto">💥 Retos</a> • <a href="./recursos/diapositivas/4.KubeCafe-Configuracion-y-Almacenamiento.pdf">📊 PDF</a></sub>
       </td>
     </tr>
@@ -454,8 +454,8 @@ flowchart LR
 * 🚀 [**Entrar a la Semana 03**](./semana-03-services-gateway) | 🧪 [**Ir a los Ejemplos**](./semana-03-services-gateway/1.ejemplos) | 💥 [**Resolver los Retos Rotos (+40 XP)**](./semana-03-services-gateway/2.reto-roto) | 📊 [**Ver Diapositivas PDF**](./recursos/diapositivas/3.KubeCafe-Services-y-Gateway-API.pdf) | 🐝 [**Ejercicios Cilium (Isovalent Labs)**](https://labs.isovalent.com/#/overview)
 </details>
 
-<details open>
-<summary><b>💾 Semana 04: Configuración y Datos Persistentes (ConfigMaps, Secrets, PV/PVC) — 🔥 En Curso</b></summary>
+<details>
+<summary><b>💾 Semana 04: Configuración, Storage y StatefulSets (🟢 Disponible — Gana +50 XP)</b></summary>
 <br>
 
 > ☕ **Misión en KubeCafé:** Separamos las **especias (`ConfigMap`)** y la **receta secreta (`Secret`)** de la imagen del contenedor, y conectamos una **Bodega externa (`PV/PVC`)** con `StorageClass` dinámico para que las ventas sobrevivan aunque se borre o reinicie el Pod.

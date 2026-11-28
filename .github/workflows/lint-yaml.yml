@@ -27,8 +27,16 @@ jobs:
 
       - name: 🧪 Validar sintaxis YAML
         run: |
-          echo "Validando archivos YAML (excluyendo carpetas reto-roto)..."
+          echo "Validando archivos YAML (excluyendo carpetas reto-roto y templates Helm)..."
           yamllint -c .yamllint.yml .
+
+      - name: ⚓ Instalar Helm y validar Chart de Semana 06
+        run: |
+          curl -fsSL https://get.helm.sh/helm-v3.17.1-linux-amd64.tar.gz | tar -xzf - -C /tmp
+          sudo mv /tmp/linux-amd64/helm /usr/local/bin/helm
+          helm lint semana-06-helm/1.ejemplos/kubecafe-chart
+          helm lint semana-06-helm/1.ejemplos/kubecafe-chart -f semana-06-helm/1.ejemplos/kubecafe-chart/values-prod.yaml
+          helm template kubecafe-ci semana-06-helm/1.ejemplos/kubecafe-chart | yamllint -c .yamllint.yml -
 
       - name: ⚙️ Validar scripts y validadores del repositorio
         run: |
