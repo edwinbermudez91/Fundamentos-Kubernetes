@@ -45,6 +45,16 @@
     "motivacion": "Apoyar y acompañar a la comunidad Cloud Native Medellín en su travesía por Kubernetes. 🏔️☕"
   },
   {
+    "github": "eandreaja",
+    "nombre": "Andrea Jaramillo",
+    "rol": "Python Developer · Data Science en formación",
+    "linkedin": "https://www.linkedin.com/in/eandreaja/",
+    "redes": [],
+    "rango": "🧭 Timonel",
+    "puntos": 280,
+    "motivacion": "Un modelo que nunca sale del notebook es un experimento que todavía no llegó a ningún lado. Voy camino a Data Scientist y vine a aprender a llevar un proyecto de Python desde el código hasta un contenedor y un clúster."
+  },
+  {
     "github": "Arlex0296",
     "nombre": "Arlex0296",
     "rol": "Tripulante de la Comunidad",
@@ -53,16 +63,6 @@
     "rango": "🧭 Timonel",
     "puntos": 260,
     "motivacion": "Aporte en PR #109: Solución retos semana 00 - Arlex0296"
-  },
-  {
-    "github": "eandreaja",
-    "nombre": "Andrea Jaramillo",
-    "rol": "Python Developer · Data Science en formación",
-    "linkedin": "https://www.linkedin.com/in/eandreaja/",
-    "redes": [],
-    "rango": "🧭 Timonel",
-    "puntos": 230,
-    "motivacion": "Un modelo que nunca sale del notebook es un experimento que todavía no llegó a ningún lado. Voy camino a Data Scientist y vine a aprender a llevar un proyecto de Python desde el código hasta un contenedor y un clúster."
   },
   {
     "github": "Cuburi",
