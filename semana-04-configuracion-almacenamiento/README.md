@@ -51,7 +51,7 @@ flowchart TD
 ```text
 semana-04-configuracion-almacenamiento/
 ├── README.md                                       # Esta guía principal
-├── 1.ejemplos/                                     # 6 laboratorios guiados paso a paso
+├── 1.ejemplos/                                     # 8 laboratorios guiados paso a paso
 │   ├── README.md                                   # Guía interactiva + verificación + limpieza
 │   ├── 01-configmap-variables-entorno.yaml         # ConfigMap -> envFrom en Pod
 │   ├── 02-configmap-volumen-archivo.yaml           # ConfigMap montado como HTML en Nginx
@@ -76,7 +76,7 @@ semana-04-configuracion-almacenamiento/
 
 1. **Explora los 8 laboratorios guiados:**
    Entra a [`1.ejemplos/README.md`](./1.ejemplos/README.md) para practicar `ConfigMaps`, `Secrets`, `emptyDir`, `hostPath`, `PV/PVC`, `StorageClass`, `StatefulSet` y `Headless Service`.
-2. **Resuelve los 4 retos rotos (+40 XP):**
+2. **Resuelve los 5 retos rotos (+50 XP):**
    Entra a [`2.reto-roto/README.md`](./2.reto-roto/README.md), reproduce los fallos en tu clúster, repáralos en `aportes-comunidad/soluciones-retos/<tu-usuario>/semana-04/` y envía tu Pull Request.
 3. **Documenta tu bitácora (+10 XP):**
    Usa el [Formulario de Bitácora Semanal](https://github.com/edwinbermudez91/Fundamentos-Kubernetes/issues/new?template=bitacora-semanal.yml) eligiendo `semana-04`.
